@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     Cindy Release Build
+                   
+	 Roger Chen
+     ====================================================================== -->
+<project name="Cindy Release Build" default="help">
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: help                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="help">
+		<echo>
+usage:
+  ant help          display this message
+
+  ant dist          create binary, require java 5.0
+  ant doc           create javadoc
+  ant clean         delete dist directory
+
+  ant helloworld	launch hello world example
+  ant simple    	launch simple tcp/ip server example
+  ant chat-server   launch chat server example
+  ant file-server   launch file transfer server example
+
+  ant -Dfile=file -Dhost=host -Dport=port file-client
+                	launch file transfer client example
+
+  ant -Dtype=(tcp|udp) -Dhost=host -Dport=port telnet
+                	launch telnet example
+			
+  ant "-Dparam=-secure -echo" http-server   
+                    launch http server example
+		</echo>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: init                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="init">
+		<tstamp />
+
+		<property name="dist.version" value="3.0b1" />
+		<property name="dist.path" value="../dist" />
+		<property name="dist.src" value="cindy-${dist.version}-src.zip" />
+		<property name="dist.bin" value="cindy-${dist.version}-bin.zip" />
+
+		<property name="dist.jar" value="cindy.jar" />
+		<property name="dist.jar.backport" value="cindy-backport.jar" />
+		<property name="dist.example" value="cindy-example.jar" />
+
+		<property name="build.temp" value="../temp" />
+
+		<fileset id="build.resource" dir="..">
+			<include name="changelog.txt" />
+			<include name="license.txt" />
+			<include name="readme.txt" />
+		</fileset>
+
+		<path id="build.classpath">
+			<fileset dir="../lib">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="${dist.path}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: doc                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="doc" depends="init">
+		<mkdir dir="${dist.path}/doc" />
+		<javadoc packagenames="*" sourcepath="../src" destdir="${dist.path}/doc" classpathref="build.classpath" use="true" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="clean" depends="init">
+		<delete dir="${dist.path}" />
+		<delete dir="${build.temp}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-src                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-src" depends="init">
+		<mkdir dir="${dist.path}" />
+		<delete file="${dist.path}/${dist.src}" />
+		<zip destfile="${dist.path}/${dist.src}" basedir="..">
+			<fileset refid="build.resource" />
+			<include name="src/**/*.*" />
+			<include name="example/**/*.*" />
+			<include name="test/**/*.*" />
+			<include name="build/**/*.*" />
+			<include name="lib/**/*.*" />
+		</zip>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-jar-backport     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-jar-backport" depends="init">
+		<mkdir dir="${build.temp}/backport" />
+		<javac srcdir="../src" destdir="${build.temp}/backport" classpathref="build.classpath" source="1.4" target="1.4" debug="true" debuglevel="source,lines" />
+
+		<mkdir dir="${dist.path}" />
+		<delete file="${dist.path}/${dist.jar.backport}" />
+		<jar destfile="${dist.path}/${dist.jar.backport}" basedir="${build.temp}/backport">
+			<manifest>
+				<attribute name="Implementation-Title" value="cindy" />
+				<attribute name="Implementation-Version" value="${dist.version}" />
+			</manifest>
+		</jar>
+		<delete dir="${build.temp}/backport" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-jar
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-jar" depends="init">
+		<copy todir="${build.temp}/src">
+			<fileset dir="../src" />
+		</copy>
+		<mkdir dir="${build.temp}/build" />
+		<javac srcdir="../build" destdir="${build.temp}/build" classpathref="build.classpath" source="1.4" target="1.4" />
+		<java classname="net.sf.cindy.build.ReplaceTask" classpath="${build.temp}/build" classpathref="build.classpath">
+			<arg value="${build.temp}/src" />
+		</java>
+		<javac srcdir="${build.temp}/src" destdir="${build.temp}/src" classpathref="build.classpath" source="1.5" target="1.5" debug="true" debuglevel="source,lines" />
+
+		<mkdir dir="${dist.path}" />
+		<delete file="${dist.path}/${dist.jar}" />
+		<jar destfile="${dist.path}/${dist.jar}" basedir="${build.temp}/src" includes="**/*.class">
+			<manifest>
+				<attribute name="Implementation-Title" value="cindy" />
+				<attribute name="Implementation-Version" value="${dist.version}" />
+			</manifest>
+		</jar>
+		<delete dir="${build.temp}/src" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-example                     
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-example" depends="init">
+		<mkdir dir="${build.temp}/example" />
+		<javac srcdir="../example" destdir="${build.temp}/example" classpathref="build.classpath" source="1.4" target="1.4" debug="true" debuglevel="source,lines" />
+
+		<mkdir dir="${dist.path}" />
+		<delete file="${dist.path}/${dist.example}" />
+		<jar destfile="${dist.path}/${dist.example}" basedir="${build.temp}/example">
+			<fileset dir="../example" excludes="**/*.java" />
+		</jar>
+		<delete dir="${build.temp}/example" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist-bin                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist-bin" depends="dist-jar-backport, dist-jar, dist-example">
+		<delete file="${dist.path}/${dist.bin}" />
+		<zip destfile="${dist.path}/${dist.bin}" basedir="..">
+			<fileset refid="build.resource" />
+			<include name="dist/${dist.jar}" />
+			<include name="dist/${dist.jar.backport}" />
+			<include name="dist/${dist.example}" />
+			<exclude name="lib/optional/ibmaio.jar" />
+			<include name="lib/**/*.*" />
+		</zip>
+		<delete dir="${build.temp}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: dist                  
+         - - - - - - - - - - - - - - - - - -->
+	<target name="dist" depends="dist-src, dist-bin">
+	</target>
+
+
+	<!-- ================================= 
+          target: helloworld              
+         ================================= -->
+	<target name="helloworld" depends="init">
+		<java classname="net.sf.cindy.example.helloworld.HelloWorld" classpathref="build.classpath" fork="true" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: chat-server                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="chat-server" depends="init">
+		<java classname="net.sf.cindy.example.chat.ChatServer" classpathref="build.classpath" fork="true" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: http-server                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="http-server" depends="init">
+		<property name="param" value="" />
+		<java classname="net.sf.cindy.example.http.HttpServer" classpathref="build.classpath" fork="true">
+			<arg line="${param}" />
+		</java>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: simple                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="simple" depends="init">
+		<java classname="net.sf.cindy.example.simple.SimpleServer" classpathref="build.classpath" fork="true" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: telnet                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="telnet" depends="init">
+		<property name="type" value="tcp" />
+		<property name="host" value="localhost" />
+		<java classname="net.sf.cindy.example.telnet.Telnet" classpathref="build.classpath">
+			<arg line="${type} ${host} ${port}"/>
+		</java>
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: file-server                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="file-server" depends="init">
+		<java classname="net.sf.cindy.example.file.FileTransferServer" classpathref="build.classpath" fork="true" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: file-client                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="file-client" depends="init">
+		<property name="host" value="localhost" />
+		<java classname="net.sf.cindy.example.file.FileTransferClient" classpathref="build.classpath" fork="true">
+			<arg line="${file} ${host} ${port}" />
+		</java>
+	</target>
+
+
+</project>

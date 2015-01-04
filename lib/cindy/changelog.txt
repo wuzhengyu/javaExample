@@ -1,0 +1,85 @@
+Cindy Change Log
+=================
+
+Changes in version 3.0b1 (04.19.2006)
+-------------------------------------
+* added hello world example
+* added simple tcp/ip service example
+* added telnet example
+* updated http server example to support directory list
+* added DefaultPacket(ByteBuffer)/DefaultPacket(byte[]) constructor
+* added SessionType class
+* added getSessionType method in the Session/SessionAcceptor interface
+* added set method in the Configuration class
+* added createSession(SessionType)/createSessionAcceptor(SessionType) method in the SessionFactory class
+* fixed bug in DirectDispatcher.block
+* some minor changes
+
+
+Changes in version 3.0a5 (03.27.2006)
+-------------------------------------
+* fixed launch http server bug in build.xml
+* renamed BufferCache to BufferPool
+* use getAttribute/setAttribute/removeAttribute instead of getAttachment/setAttachment in Session interface
+* improved DefaultBufferPool efficiency
+* redesign SessionAcceptor
+* fixed dispatch order bug in AbstractChannelSession class
+* added multi-accept behaviour in ServerSocketChannelSession class
+* added acceptor/session.socketSession/session.datagramSession configuration
+* override equals method in AbstractBuffer class
+* some minor improved
+
+
+Changes in version 3.0a4 (03.11.2006)
+-------------------------------------
+* SSLFilter can be used in any stream based session
+* added dispatcher pool support (-Dnet.sf.cindy.dispatcher.concurrent)
+* fixed dispatch order bug in DefaultDispatcher
+* fixed flow control bug in DefaultDispatcher
+* added DirectDispatcher class
+* added dump() method in Buffer interface
+* added getSession() method in Future interface
+* added ServerSocketChannelSessionHandler interface
+* renamed ExecutorFilter to DispatcherFilter
+* renamed HSHAReactor to DefaultReactor
+* renamed CindyConstants to Configuration
+* divided net.sf.cindy.message package into net.sf.cindy.encoder and net.sf.cindy.decoder
+* updated http example
+* supported cindy config file (-Dnet.sf.cindy.config=config file)
+* some minor improved and bus fixed
+
+
+Changes in version 3.0a3 (02.27.2006)
+-------------------------------------
+* added SSLFilter
+* added net.sf.cindy.session.dispatcher package, can add custom implementation (-Dnet.sf.cindy.dispatcher=Dispatcher implementation class)
+* dispatch xxxSend/xxxSent event in reversed order
+* added release/isReleased/isPermanent/setPermanent methond in Buffer interface
+* removed release method in BufferFactory class
+* added wrap(Buffer[]) method in BufferFactory class
+* added release method in BufferBuilder class
+* removed packetReceived/packetSent event in SessionHandler interface
+* use writeUnshared instead of write in SerialEncoder class
+* check stream header in SerialDecoder class
+* improved LinkedBuffer efficiency
+* improved DefaultBufferCache efficiency
+* added backlog/reuseAddress/receiveBufferSize properties in SocketSessionAcceptor interface
+* some minor improved and bugs fixed
+
+
+Changes in version 3.0a2 (02.10.2006)
+-------------------------------------
+* added jmx support (-Dnet.sf.cindy.useJmx)
+* added flow control
+* improved buffer efficiency
+* improved PacketDecoderFilter efficiency
+* changed default PacketEncoder to SimplePacketEncoder, default PacketDecoder to SimplePacketDecoder
+* added objectSent event
+* check session timeout bug fixed
+* instead of throw a runtime exception, send content to a closed session will return a completed failed future
+* some minor improved and bugs fixed
+
+
+Changes in version 3.0a1 (01.24.2006)
+-------------------------------------
+* Architecture redesign
