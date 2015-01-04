@@ -32,30 +32,26 @@ import net.sf.cindy.session.SessionFactory;
  */
 public class SimpleServer {
 
-    public static void main(String[] args) throws IOException {
-        startService(7, new EchoHandler(), "Echo service");
-        startService(9, new DiscardHandler(), "Discard service");
-        startService(13, new DaytimeHandler(), "Daytime service");
-        startService(19, new ChargenHandler(), "Chargen service");
-    }
+	public static void main(String[] args) throws IOException {
+		startService(7, new EchoHandler(), "Echo service");
+		startService(9, new DiscardHandler(), "Discard service");
+		startService(13, new DaytimeHandler(), "Daytime service");
+		startService(19, new ChargenHandler(), "Chargen service");
+	}
 
-    private static void startService(int port, final SessionHandler handler,
-            String serviceType) {
-        SessionAcceptor acceptor = SessionFactory
-                .createSessionAcceptor(SessionType.TCP);
-        acceptor.setListenPort(port);
-        acceptor.setAcceptorHandler(new SessionAcceptorHandlerAdapter() {
+	private static void startService(int port, final SessionHandler handler, String serviceType) {
+		SessionAcceptor acceptor = SessionFactory.createSessionAcceptor(SessionType.TCP);
+		acceptor.setListenPort(port);
+		acceptor.setAcceptorHandler(new SessionAcceptorHandlerAdapter() {
 
-            public void sessionAccepted(SessionAcceptor acceptor,
-                    Session session) throws Exception {
-                session.setSessionHandler(handler);
-                session.start();
-            }
+			public void sessionAccepted(SessionAcceptor acceptor, Session session) throws Exception {
+				session.setSessionHandler(handler);
+				session.start();
+			}
 
-        });
-        acceptor.start();
-        if (acceptor.isStarted())
-            System.out.println(serviceType + " listen on "
-                    + acceptor.getListenAddress());
-    }
+		});
+		acceptor.start();
+		if (acceptor.isStarted())
+			System.out.println(serviceType + " listen on " + acceptor.getListenAddress());
+	}
 }
